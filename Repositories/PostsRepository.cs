@@ -1,4 +1,5 @@
-﻿using Reddit.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using Reddit.Models;
 using System.Linq.Expressions;
 
 namespace Reddit.Repositories
@@ -14,8 +15,7 @@ namespace Reddit.Repositories
         public async Task<PagedList<Post>> GetPosts(int pageNumber, int pageSize, string? searchTerm, string? sortTerm = null, bool isAscending = true)
         {
             var posts = _context.Posts.AsQueryable();
-            // Validate 
-            // Filtration
+
             if (searchTerm != null)
             {
                 posts = posts.Where(p => p.Title.Contains(searchTerm) || p.Content.Contains(searchTerm));
@@ -31,7 +31,10 @@ namespace Reddit.Repositories
                 posts = posts.OrderByDescending(GetSortExpression(sortTerm));
             }
 
-            return await PagedList<Post>.CreateAsync(posts, pageNumber, pageSize);
+            // Pagination 
+            var paginatedPosts = await posts.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            return await PagedList<Post>.CreateAsync(paginatedPosts, posts.Count(), pageNumber, pageSize);
         }
 
         private Expression<Func<Post, object>> GetSortExpression(string? sortTerm)

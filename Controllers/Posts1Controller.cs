@@ -20,12 +20,15 @@ namespace Reddit.Controllers
             _postsRepository = postsRepository;
         }
 
+
         // GET: api/Posts1
         [HttpGet]
         public async Task<PagedList<Post>> GetPosts(
             string? searchTerm = null,
-            int pageSize=3, int pageNumber = 1,
-            string? sortTerm = null, bool isAscending = true)
+            int pageSize=3,
+            int pageNumber = 1,
+            string? sortTerm = null,
+            bool isAscending = true)
         {
             return await _postsRepository.GetPosts(pageNumber, pageSize, searchTerm, sortTerm, isAscending);
         }

@@ -22,6 +22,27 @@ namespace Reddit.Controllers
             _context = context;
         }
 
+        /// sorting
+        [HttpGet]
+        public async Task<ActionResult> GetUsers(string searchKey = null, bool sortDescending = false)
+        {
+            var query = _context.Users.Select(u => new { u.Id, PostCount = u.Posts.Count, u.Email, u.Name });
+
+            if (!string.IsNullOrEmpty(searchKey) )
+            {
+                query = query.Where(u => u.Email.Contains(searchKey) || u.Name.Contains(searchKey));
+            }
+            if(sortDescending)
+            {
+                query = query.OrderByDescending(u => u.PostCount);
+            } else
+            {
+                query = query.OrderBy(u => u.PostCount);
+            }
+            var users = await query.ToListAsync();
+            return Ok(users);
+        }
+
         // GET: api/Users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
